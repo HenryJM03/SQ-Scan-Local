@@ -16,4 +16,5 @@ pip install -r requirements.txt
 
 6. flask run --host=0.0.0.0 --port=5000
 
-* The reset password require your own Gmail setup to function correctly
+
+* The reset password function require your own Gmail setup to function correctly
