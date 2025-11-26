@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account - SqScan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const logoutLink = document.getElementById("logout-confirmation");
+  if (logoutLink) {
+    logoutLink.addEventListener("click", function(event) {
+      event.preventDefault(); // Stop default navigation
+      const confirmLogout = confirm("Are you sure you want to log out?");
+      if (confirmLogout) {
+        window.location.href = logoutLink.href; // Proceed to logout
+      }
+    });
+  }
+});
+</script>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Logo -->
+        <img src="{{ url_for('static', filename='images/logo_colour.png') }}" alt="SqScan Logo" class="side_logo">
+        <h2>Welcome, {{ user['name'] }}</h2>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('scan') }}">Scan</a>
+        <a href="{{ url_for('template') }}">Template</a>
+        <a href="{{ url_for('account') }}">Account</a>
+        <a href="{{ url_for('info') }}">Resources</a>
+        <a href="{{ url_for('logout') }}" id="logout-confirmation">Log out</a>
+    </div>
+
+<div class="form-container1">
+    <h2>Account Settings</h2>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Profile Picture Section -->
+    <form method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+        <div class="profile-picture">
+            <img id="profilePreview" class="profile-pic-preview" src="{{ url_for('static', filename='uploads/' + (user.profile_picture or 'default_pic.jpg')) }}" alt="Profile Picture">
+
+            <!-- Hidden file input -->
+            <input type="file" id="profile_picture" name="profile_picture" accept="image/*" hidden>
+
+            <!-- Custom button overlay -->
+            <label for="profile_picture" class="upload-btn">📷 Change</label>
+        </div>
+        
+        <div id="uploadMessage" class="uploadMessage">
+            Profile picture selected! Click Update to apply changes.
+        </div>
+
+        <label>Name:</label>
+        <input type="text" name="name" value="{{ user.name }}" required><br>
+
+        <label>Email:</label>
+        <input type="email" name="email" value="{{ user.email }}" required><br>
+
+        <label>New Password:</label>
+        <input type="password" name="password" placeholder="Leave blank to keep current" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':&quot;\\|,.<>/?]).{8,}" title="Password must mix with uppercase, lowercase, number and special characters with 8 characters long"><br>
+
+
+        <button type="submit" class="update">Update</button>
+        <a href="{{ url_for('dashboard') }}"><button type="button" class="cancel">Cancel</button></a>
+    </form>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Profile picture elements
+    const profileInput = document.getElementById('profile_picture');
+    const profilePreview = document.getElementById('profilePreview');
+    const uploadMessage = document.getElementById('uploadMessage');
+
+    // Hide message initially
+    uploadMessage.style.display = 'none';
+
+    // Show preview and message on file select
+profileInput.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            alert("Only JPG, PNG, or GIF images are allowed.");
+            profileInput.value = ""; // clear selection
+            uploadMessage.style.display = 'none';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            profilePreview.src = e.target.result;
+            uploadMessage.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    } else {
+        uploadMessage.style.display = 'none';
+    }
+});
+
+    // Password validation
+    window.validateForm = function() {
+        const password = document.querySelector('input[name="password"]').value;
+        if (password) {
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{};':"\\|,.<>/?]).{8,}$/;
+            if (!regex.test(password)) {
+                alert("Password must mix with uppercase, lowercase, number and special characters with 8 characters long");
+                return false;
+            }
+        }
+        return true;
+    }
+});
+</script>
+</div>
+</body>
+</html>
