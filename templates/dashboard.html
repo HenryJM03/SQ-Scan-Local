@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - SqScan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const logoutLink = document.getElementById("logout-confirmation");
+  if (logoutLink) {
+    logoutLink.addEventListener("click", function(event) {
+      event.preventDefault(); // Stop default navigation
+      const confirmLogout = confirm("Are you sure you want to log out?");
+      if (confirmLogout) {
+        window.location.href = logoutLink.href; // Proceed to logout
+      }
+    });
+  }
+});
+</script>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Logo -->
+        <img src="{{ url_for('static', filename='images/logo_colour.png') }}" alt="SqScan Logo" class="side_logo">
+        <h2>Welcome, {{ user['name'] }}</h2>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('scan') }}">Scan</a>
+        <a href="{{ url_for('template') }}">Template</a>
+        <a href="{{ url_for('account') }}">Account</a>
+        <a href="{{ url_for('info') }}">Resources</a>
+        <a href="{{ url_for('logout') }}" id="logout-confirmation">Log out</a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        <div class="stats">
+            <div class="stat-box">
+                <h3>TOTAL SCANS</h3>
+                <p>{{ total_scans }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>COMPLETED SCANS</h3>
+                <p>{{ completed_scans }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>VULNERABILITIES DETECTED</h3>
+                <p>{{ vulnerabilities_detected }}</p>
+            </div>
+        </div>
+
+        <h2>Recent Scans</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>No. </th>
+                    <th>Target</th>
+                    <th>Scan Type</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for scan in recent_scans %}
+                <tr>
+		  <td>{{ loop.index }}</td>
+		  <td>{{ scan.target_url }}</td>
+		  <td>{{ scan.scan_type_id }}</td>
+		  <td class="scan-status {% if scan.scan_status == 'Completed' %}completed{% endif %}">{{ scan.scan_status }}</td>
+		  <td>{{ scan.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No scans yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

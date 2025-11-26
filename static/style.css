@@ -1,0 +1,902 @@
+/* Only affects selected page */
+body.login,
+body.register,
+body.reset_password,
+body.reset_request{
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+body.login .form-container,
+body.register .form-container,
+body.reset_password .form-container,
+body.reset_request .form-container{
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    width: 500px;
+    height: auto;
+    text-align: center;
+    font-size: 18px;
+}
+
+body.login button,
+body.register button,
+body.reset_password button,
+body.reset_request button{
+    width: 95%;
+    height: 40px;
+    padding: 10px;
+    background: #222;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+body.login input,
+body.register input,
+body.reset_password input,
+body.reset_request input{
+    width: 90%;
+    height: 25px;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 18px;
+}
+
+body.login input::placeholder,
+body.register input::placeholder, 
+body.reset_password::placeholder,
+body.reset_request input::placeholder  {
+    font-size: 18px;
+}
+
+.g-recaptcha {
+    display: flex;
+    justify-content: left;
+    margin: 10px 0;
+    margin-left: 15px;
+    transform-origin: 0 0;    /* align scaling properly */
+    margin-bottom: -10px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+}
+
+.form-container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    width: 320px;
+    text-align: center;
+}
+.form-container h2 {
+    margin-bottom: 20px;
+}
+
+input {
+    width: 90%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    width: 100%;
+
+}
+.alert-success { background: #d4edda; color: #155724; }
+.alert-danger { background: #f8d7da; color: #721c24; }
+.alert-info { background: #cce5ff; color: #004085; }
+
+.logo {
+    display: block;
+    margin: 0 auto 15px auto;
+    width: 150px; 
+}
+
+.side_logo {
+    display: block;
+    margin: 0 auto 15px auto;
+    width: 200px; 
+}
+
+/* Sidebar */
+.sidebar {
+    width: auto;
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    flex-shrink: 0; /* don’t shrink on resize */
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+    font-size: 30px;
+    padding: 8px;
+    border-bottom: 2px solid white;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    font-size: 25px;
+    text-decoration: none;
+    margin: 12px 0;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.sidebar a:hover {
+    background-color: #444;
+}
+
+/* Main dashboard */
+.main {
+    flex: 1;                /* take remaining width */
+    padding: 20px;
+    background: #f4f4f4;
+    min-height: 100vh;
+    overflow-x: auto;       /* prevent table overflow */
+}
+
+/* Stats layout */
+.stats {
+    display: flex;
+    flex-direction: column;   /* stack vertically */
+    align-items: stretch;     /* force children to same width */
+    gap: 16px;                /* equal spacing instead of margin-bottom */
+}
+
+.stat-box {
+    flex: 1;                  /* take full available width */
+    background: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 20px;
+}
+
+.stat-box p{
+    font-size: 25px;
+    font-weight: bold;
+}
+
+/* Global table style */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    border: none; /* remove outer outline */
+}
+td.completed {
+    color: #28a745;
+    font-weight: bold;
+}
+th, td {
+    font-size: 20px;
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd; 
+    border-left: 1px solid #ddd;   /* vertical dividers */
+    border-right: none;            /* remove double lines */
+}
+
+/* Remove divider on the very first column */
+th:first-child,
+td:first-child {
+    border-left: none;
+}
+
+/* Remove divider on the very last column */
+th:last-child,
+td:last-child {
+    border-right: none;
+}
+
+th {
+    background: #222;
+    color: white;
+}
+
+hr {
+    border: none;
+}
+
+
+
+/* Responsive: stack sidebar on smaller screens */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        text-align: center;
+    }
+
+    .main {
+        width: 100%;
+        margin: 0;
+        padding: 15px;
+    }
+
+    .sidebar a {
+        display: inline-block;
+        margin: 8px;
+    }
+
+    th, td {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+/* Account page */
+
+.form-container1 {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    width: 80%;
+    margin: 20px auto;
+    text-align: left;
+    position: relative;
+}
+
+.form-container1 h2 {
+    margin-bottom: 20px;
+    font-size: 30px;
+    text-align: center;
+    border-bottom: 2px solid #ccc; /* optional underline */
+    padding-bottom: 10px;
+}
+
+.form-container1 label {
+    font-size: 18px;
+    display: block;       /* each label takes full line */
+    margin: 10px 0 5px;   /* spacing */
+    font-weight: bold;
+}
+
+.form-container1 input {
+    width: 100%;
+    height: auto;
+    font-size: 18px;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* ensure padding doesn't break width */
+}
+
+.form-container1 button{
+    padding: 10px;
+    width: 100%;
+    background: #222;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.form-container1 button.update{
+    padding: 10px;
+    width: 100%;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.form-container1 button.cancel{
+    padding: 10px;
+    width: 100%;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.profile-picture {
+    position: relative;
+    object-position: center; /* center image */
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #ddd;
+    background: #f0f0f0; /* fallback grey background so it's not just white */
+}
+
+.profile-pic-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /* make sure image fills circle */
+    object-position: center; /* center image */
+    display: block;
+    border-radius: 50%;
+}
+
+/* Overlay button */
+.upload-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* Account/Profile form container */
+.form-container1 .uploadMessage {
+    text-align: center;
+    display: none;
+    color: green;
+    margin-top: 10px;  
+    font-weight: bold;   
+}
+
+/* Scan page */
+.form-container2 {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    width: 80%;
+    margin: 20px auto;
+    text-align: left;
+    position: relative;
+}
+
+.form-container2 h2 {
+    margin-bottom: 20px;
+    font-size: 30px;
+    text-align: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.form-container2 input[type="text"],
+.form-container2 select {
+    width: 100%;
+    font-size: 18px;
+    max-width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.form-container2 .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-container2 .form-group label {
+    display: block;
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.form-container2 .checkbox-group {
+    display: flex;
+    align-items: center;   /* vertical alignment */
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.form-container2 .checkbox-group input[type="checkbox"] {
+    transform: scale(1.5);
+    margin: 0;
+    max-width: 25px;
+    cursor: pointer;
+}
+
+.form-container2 button:hover {
+    background: #555;
+}
+
+.form-container2 button.download_button_MD{
+    padding: 10px;
+    background: #0458ab;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+    white-space: nowrap; /* prevent wrapping */
+}
+
+.form-container2 button.download_button_PDF{
+    padding: 10px;
+    background: #37beb0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+    white-space: nowrap; /* prevent wrapping */
+}
+
+.form-container2 button.delete_button {
+    padding: 10px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+    white-space: nowrap; /* prevent wrapping */
+}
+
+.form-container2 button.scan_button {
+    padding: 10px;
+    min-width: 250px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+    white-space: nowrap; /* prevent wrapping */
+}
+/* Wrapper enables horizontal scroll */
+.form-container2 .table-wrapper {
+    width: 100%;
+    overflow-x: auto;       /* scroll horizontally if needed */
+    display: flex;
+    justify-content: center; /* center table inside wrapper */
+}
+
+/* Table styling */
+.form-container2 .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.form-container2 .scan_table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto; /* keeps natural column width, not evenly forced */
+}
+
+.form-container2 .scan_table th,
+.form-container2 .scan_table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
+  word-wrap: break-word;
+}
+
+/* Slightly narrower number/status columns */
+.form-container2 .scan_table th:nth-child(1),
+.form-container2 .scan_table td:nth-child(1) {
+  width: 4%;
+}
+
+.form-container2 .scan_table th:nth-child(4),
+.form-container2 .scan_table td:nth-child(4) {
+  width: 8%;
+}
+
+/* Target column gets more space */
+.form-container2 .scan_table th:nth-child(2),
+.form-container2 .scan_table td:nth-child(2) {
+  width: 22%;
+}
+
+/* Start and End times balanced */
+.form-container2 .scan_table th:nth-child(6),
+.form-container2 .scan_table td:nth-child(6),
+.form-container2 .scan_table th:nth-child(7),
+.form-container2 .scan_table td:nth-child(7) {
+  width: 13%;
+}
+
+/* Buttons a bit smaller */
+.form-container2 .scan_table th:nth-child(8),
+.form-container2 .scan_table td:nth-child(8),
+.form-container2 .scan_table th:nth-child(9),
+.form-container2 .scan_table td:nth-child(9),
+.form-container2 .scan_table th:nth-child(10),
+.form-container2 .scan_table td:nth-child(10) {
+  width: 9%;
+}
+
+/* Optional styling for better readability */
+.form-container2 .scan_table thead {
+  background: #222;
+  color: white;
+}
+
+.form-container2 .scan_table tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+
+.form-container2 .scanmode-inline {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    white-space: nowrap; /* prevent wrapping */
+}
+
+.form-container2 .scanmode-inline label {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+/* Template page */
+
+.form-container3 {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    width: 80%;
+    margin: 20px auto;
+    text-align: left;
+    position: relative;
+}
+
+.form-container3 h2 {
+    margin-bottom: 20px;
+    font-size: 30px;
+    text-align: center;
+    border-bottom: 2px solid #ccc; /* optional underline */
+    padding-bottom: 10px;
+}
+
+
+.form-container3 textarea {
+    width: 100%;
+    height: 150px;
+    padding: 5px;
+    font-family: monospace;
+    font-size: 14px;
+    box-sizing: border-box; /* ensures padding doesn't break width */
+    resize: vertical; /* allow vertical resize only */
+}
+
+.form-container3 .template-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.form-container3 input[type="text"]{
+    width: 100%;
+    font-size: 18px;
+    max-width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.form-container3 button.createTemplate{
+    padding: 10px;
+    min-width: 120px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.form-container3 button.saveTemplate{
+    padding: 10px;
+    min-width: 120px;
+    background: #0458ab;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.form-container3 button.deleteTemplate{
+    padding: 10px;
+    min-width: 120px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.form-container3 #templateSelect {
+  width: 350px;          /* make dropdown wider */
+  font-size: 18px;       /* larger text */
+  padding: 8px;          /* inner spacing */
+  border-radius: 6px;    /* smooth corners */
+  border: 1px solid #ccc;
+  box-sizing: border-box; /* keeps width consistent */
+}
+
+.form-container3 .styled-textarea {
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+.form-container3 .styled-input {
+    width: 50%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+.form-container3 .validation-error {
+    color: red;
+    margin-top: 5px;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+
+.form-container3 .CodeMirror { 
+    border:1px solid #ccc; 
+    border-radius:6px; 
+    height:200px; 
+}
+/* Info Page */
+.form-container4 {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    width: 80%;
+    margin: 20px auto;
+    text-align: left;
+    position: relative;
+}
+
+/* Title */
+.form-container4 h2 {
+    margin-bottom: 25px;
+    font-size: 30px;
+    text-align: center;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+}
+
+/* Subtitles */
+.form-container4 h3 {
+    margin-top: 25px;
+    font-size: 22px;
+    color: #357ABD;
+    border-left: 4px solid #222;
+    padding-left: 10px;
+}
+
+/* Paragraphs */
+.form-container4 p {
+    font-size: 16px;
+    margin-top: 10px;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+/* Info box */
+.form-container4 .info-box {
+    background: #f7f7f7;
+    border-left: 5px solid #222;
+    padding: 12px 18px;
+    margin: 15px 0;
+    border-radius: 6px;
+}
+
+/* Templates section */
+.form-container4 .templates-section {
+    margin-top: 20px;
+}
+
+.form-container4 .template-item {
+    margin: 10px 0;
+    padding: 0;
+    border-radius: 6px;
+    background: #fafafa;
+    border: 1px solid #e6e6e6;
+}
+
+.form-container4 .template-item > summary {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+    display: block;
+}
+
+.form-container4 .template-item > summary::-webkit-details-marker {
+    display: none;
+}
+
+.form-container4 .template-item > summary {
+    position: relative;
+    cursor: pointer;
+    padding-left: 20px; /* space for the arrow */
+}
+
+.form-container4 .template-item > summary::after {
+    content: "▸";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.15s ease;
+}
+
+/* Rotate when opened */
+.form-container4 .template-item[open] > summary::after {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+.form-container4 .template-body {
+    padding: 12px 14px;
+    border-top: 1px solid #eee;
+}
+
+
+.form-container4 .tmpl-pre {
+    white-space: pre-wrap;
+    max-height: 420px;
+    overflow: auto;
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.form-container4 .tmpl-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.form-container4 .btn-copy {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #cfcfcf;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+.form-container4 .btn-copy:hover {
+    background: #f2f2f2;
+}
+
+/* Grid for SQLi types */
+.form-container4 .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 35px;   /* Increased from 20px → 35px */
+    margin-top: 20px;  /* More top spacing */
+}
+
+/* Individual SQLi type boxes */
+.form-container4 .info-section {
+    background: #f9f9f9;
+    border-left: 5px solid #357ABD;
+    padding: 22px;  /* slightly bigger internal padding */
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.form-container4 .info-section h3 {
+    margin-top: 0;
+    font-size: 20px;
+}
+
+/* Inline code */
+.form-container4 code.inline {
+    background: #eee;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: monospace;
+}
+
+/* Divider before each h4 inside the YAML guide section */
+.form-container4 .yaml-guide h4 {
+    position: relative;
+    padding-top: 15px;
+    margin-top: 30px;
+    font-size: 18px;
+    color: #222;
+}
+
+.form-container4 .yaml-guide h4::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* length of the line */
+    height: 3px; /* thickness */
+    background-color: #357ABD; /* matching your theme color */
+    border-radius: 2px;
+}
+
+
+/* Notes and contact */
+.form-container4 .note {
+    font-style: italic;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.form-container4 .contact {
+    text-align: center;
+    padding: 15px 0;
+    border-radius: 12px;
+    background-color: #f2f2f2;
+    color: #333;
+    font-size: 16px;
+    margin-top: 20px;
+}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Template - SqScan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/eclipse.min.css">
+</head>
+
+<body>
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='images/logo_colour.png') }}" alt="SqScan Logo" class="side_logo">
+        <h2>Welcome, {{ user['name'] }}</h2>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('scan') }}">Scan</a>
+        <a href="{{ url_for('template') }}">Template</a>
+        <a href="{{ url_for('account') }}">Account</a>
+        <a href="{{ url_for('info') }}">Resources</a>
+        <a href="{{ url_for('logout') }}" id="logout-confirmation">Log out</a>
+    </div>
+
+    <div class="form-container3">
+        <h2>Template Dashboard</h2>
+
+        <!-- Create Template -->
+        <h3>Create New Template</h3>
+        <input type="text" id="newName" placeholder="Template Name" class="styled-input"><br><br>
+        <textarea id="newContent">
+id: example-template
+info:
+  name: Example Template
+  author: your-name
+  severity: info
+  description: This is a sample template.
+  tags: example
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}/"
+    matchers:
+      - type: word
+        words:
+          - "Example Domain"
+        </textarea>
+        <div id="createError" class="validation-error"></div>
+        <button onclick="createTemplate()" class="createTemplate">Create</button>
+
+        <hr>
+
+        <!-- Edit Template -->
+        <h3>Edit Existing Template</h3>
+        <select id="templateSelect" onchange="loadTemplateContent()" class="styled-input">
+            <option value="">-- Select a template --</option>
+            {% for t in template_names %}
+            <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+        </select><br><br>
+        <textarea id="editContent"></textarea>
+        <div id="editError" class="validation-error"></div>
+        <button onclick="saveTemplate()" class="saveTemplate">Save</button>
+        <button onclick="deleteTemplate()" class="deleteTemplate">Delete</button>
+    </div>
+
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/yaml/yaml.min.js"></script>
+    <script>
+    // Initialize CodeMirror for create and edit textareas
+    const createEditor = CodeMirror.fromTextArea(document.getElementById("newContent"), {
+        lineNumbers: true,
+        mode: "yaml",
+        theme: "eclipse",
+        indentUnit: 2,
+        tabSize: 2,
+        lineWrapping: true
+    });
+
+    const editEditor = CodeMirror.fromTextArea(document.getElementById("editContent"), {
+        lineNumbers: true,
+        mode: "yaml",
+        theme: "eclipse",
+        indentUnit: 2,
+        tabSize: 2,
+        lineWrapping: true
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const logoutLink = document.getElementById("logout-confirmation");
+        logoutLink?.addEventListener("click", function(event){
+            event.preventDefault();
+            if(confirm("Are you sure you want to log out?")) window.location.href = logoutLink.href;
+        });
+    });
+
+    function showCreateError(msg){ document.getElementById("createError").innerText = msg; }
+    function showEditError(msg){ document.getElementById("editError").innerText = msg; }
+    function showSuccess(msg){ alert(msg); location.reload(); }
+
+    async function createTemplate(){
+        const nameInput = document.getElementById('newName');
+        const name = nameInput.value.trim();
+        const content = createEditor.getValue();
+        showCreateError("");
+
+        if(!name || !content){ 
+            showCreateError("Name and content required."); 
+            return; 
+        }
+
+        const res = await fetch("/template/create", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({name, content})
+        });
+        const data = await res.json();
+
+        if(data.success) {
+            showSuccess("Template created successfully!");
+            nameInput.value = "";        // Clear the template name field
+            createEditor.setValue("");   // Optional: clear content if you want
+        } else {
+            showCreateError(data.error);
+        }
+    }
+
+    async function loadTemplateContent(){
+        const name = document.getElementById('templateSelect').value;
+        if(!name){ editEditor.setValue(""); return; }
+        const res = await fetch(`/template/content/${name}`);
+        const data = await res.json();
+        if(data.success) editEditor.setValue(data.content); else alert(data.error);
+    }
+
+    async function saveTemplate(){
+        const name = document.getElementById('templateSelect').value;
+        const content = editEditor.getValue();
+        showEditError("");
+        if(!name){ showEditError("Please select a template."); return; }
+        const res = await fetch(`/template/edit/${name}`, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({content})});
+        const data = await res.json();
+        if(data.success) showSuccess("Template saved successfully!"); else showEditError(data.error);
+    }
+
+    async function deleteTemplate(){
+        const name = document.getElementById('templateSelect').value;
+        showEditError("");
+        if(!name){ showEditError("Please select a template."); return; }
+        if(!confirm(`Delete template "${name}"?`)) return;
+        const res = await fetch(`/template/delete/${name}`, {method:"POST"});
+        const data = await res.json();
+        if(data.success) showSuccess("Template deleted successfully!"); else showEditError(data.error);
+    }
+    </script>
+</body>
+</html>
