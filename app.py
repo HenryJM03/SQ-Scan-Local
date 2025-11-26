@@ -11,6 +11,7 @@ import threading
 import subprocess
 import shutil
 import smtplib
+import time
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
@@ -22,6 +23,9 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = "f9d8a3c7b2e14f6d9a7c3b5e8f2d1a4c7b6e9f0d3a2b1c8e"
+
+os.environ['TZ'] = 'Asia/Kuala_Lumpur'
+time.tzset()
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -1079,3 +1083,4 @@ def get_user_folder():
 # -------------------- MAIN --------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
